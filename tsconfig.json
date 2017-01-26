@@ -17,6 +17,7 @@
 		]
 	},
 	"files": [
+		"src/index.ts",
 		"src/vue-typescript-component.ts"
 	],
 	"atom": {
