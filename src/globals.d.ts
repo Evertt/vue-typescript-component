@@ -12,3 +12,7 @@ declare const process: {
 declare interface Array<T> {
 	mapToObject(transform: (obj: any) => any): any
 }
+
+declare type Constructor = {
+    new (...args: any[]): any;
+};

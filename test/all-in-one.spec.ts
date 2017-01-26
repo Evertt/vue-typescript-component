@@ -1,7 +1,7 @@
 /// <reference path='../node_modules/@types/jest/index.d.ts' />
 
 import Vue = require('vue')
-import { Component, prop, watch } from '../src/vue-typescript-component'
+import { Component, prop, watch, lifecycle } from '../src/index'
 
 @Component
 class AllInOne extends Vue {
@@ -17,6 +17,9 @@ class AllInOne extends Vue {
 	@prop aStringProp: string
 	@prop aNumberProp: number
 
+	@prop(String) anExplicitStringProp: string
+	@prop([String, Number]) anExplicitlyTypedProp: string | number
+
 	get aComputedString(): string { return this.aString }
 	set aComputedString(value: string) { this.aString = value }
 
@@ -29,7 +32,7 @@ class AllInOne extends Vue {
 	aMethod() { return 'aMethod' }
 
 	// a lifecycle hook
-	created() { /* do nothing */ }
+	@lifecycle created() { /* do nothing */ }
 
 	@watch('aString') aStringWatch(val: string, oldVal: string) { /* do nothing */ }
 }

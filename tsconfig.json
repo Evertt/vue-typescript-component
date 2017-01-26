@@ -9,6 +9,7 @@
 		"sourceMap": false,
 		"pretty": true,
 		"declaration": true,
+		"emitDecoratorMetadata": true,
 		"lib": [
 			"es5",
 			"dom",

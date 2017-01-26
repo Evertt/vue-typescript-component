@@ -4,13 +4,14 @@ import { decorators } from './decorators'
 
 export type ComponentOptions = Vue.ComponentOptions<Vue>
 
-Array.prototype.mapToObject = (transform: (obj: any) => any) => {
-	let transformed: any = {}
-	for (let elem of this) {
-		objAssign(transformed, transform(elem))
+Array.prototype.mapToObject =
+	function(transform: (obj: any) => any): any {
+		let transformed: any = {}
+		for (let elem of this) {
+			objAssign(transformed, transform(elem))
+		}
+		return transformed
 	}
-	return transformed
-}
 
 export interface NoArgumentConstructable {
 	new (): any
@@ -22,7 +23,7 @@ function isNoArgumentConstructable(arg: any): arg is NoArgumentConstructable {
 	return arg instanceof Function
 }
 
-let makeObject = (obj: any) => (key: string) => ({ key: obj[key] })
+let makeObject = (obj: any) => (key: string) => ({ [key]: obj[key] })
 let getMethod  = (obj: any) => (key: string) => Object.getOwnPropertyDescriptor(obj, key).value
 
 function makeComponentDecorator(options: ComponentOptions = {}): ComponentDecorator {
@@ -30,12 +31,20 @@ function makeComponentDecorator(options: ComponentOptions = {}): ComponentDecora
 		const component = new Component()
 		const prototype = Component.prototype
 
-		let andDecorate = (key: string) => ! (decorators[key] || []).reduce(
-			(result, decorator) => decorator(options) || result, false,
-		)
+		let andDecorate = (obj: any) => (key: string) =>
+			key == 'constructor' || ! (decorators[key] || []).reduce(
+				(result, decorator) => decorator(options, obj) || result, false,
+			)
 
-		let componentKeys = Object.getOwnPropertyNames(component).filter(andDecorate)
-		let prototypeKeys = Object.getOwnPropertyNames(prototype).filter(andDecorate)
+		let componentKeys = Object.getOwnPropertyNames(component).filter(andDecorate(component))
+		let prototypeKeys = Object.getOwnPropertyNames(prototype).filter(andDecorate(prototype))
+
+		let decKeys = Object.keys(decorators)
+		let allKeys = componentKeys.concat(prototypeKeys)
+		decKeys.filter(key => allKeys.indexOf(key) === -1).filter(andDecorate(component))
+
+		componentKeys = componentKeys.filter(andDecorate(component))
+		prototypeKeys = prototypeKeys.filter(andDecorate(prototype))
 
 		getData(componentKeys, options, component)
 		getMethods(prototypeKeys, options, prototype)
@@ -73,7 +82,7 @@ function getComputed(keys: string[], options: ComponentOptions, prototype: any) 
 
 	options.computed = computedKeys.mapToObject( key => {
 		let pd = Object.getOwnPropertyDescriptor(prototype, key)
-		return { key: { get: pd.get, set: pd.set } }
+		return { [key]: { get: pd.get, set: pd.set } }
 	})
 }
 

@@ -1,4 +1,5 @@
 export * from './prop'
 export * from './watch'
+export * from './injected'
 export * from './lifecycle'
 export * from './component'

@@ -12,12 +12,18 @@ Object {
       "get": [Function],
       "set": [Function],
     },
-    "aComputedNumberGetter": [Function],
+    "aComputedNumberGetter": Object {
+      "get": [Function],
+      "set": undefined,
+    },
     "aComputedString": Object {
       "get": [Function],
       "set": [Function],
     },
-    "aComputedStringGetter": [Function],
+    "aComputedStringGetter": Object {
+      "get": [Function],
+      "set": undefined,
+    },
   },
   "created": [Function],
   "data": [Function],
@@ -29,6 +35,7 @@ Object {
   "props": Object {
     "aNumberProp": Object {
       "required": true,
+      "type": [Function],
     },
     "aNumberPropWithValue": Object {
       "default": 123,
@@ -36,15 +43,27 @@ Object {
     },
     "aStringProp": Object {
       "required": true,
+      "type": [Function],
     },
     "aStringPropWithValue": Object {
       "default": "abc",
       "type": [Function],
     },
+    "anExplicitStringProp": Object {
+      "required": true,
+      "type": [Function],
+    },
+    "anExplicitlyTypedProp": Object {
+      "required": true,
+      "type": Array [
+        [Function],
+        [Function],
+      ],
+    },
   },
   "watch": Object {
     "aString": Object {
-      "handler": [Function],
+      "handler": "aStringWatch",
     },
   },
 }

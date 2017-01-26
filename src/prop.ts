@@ -1,30 +1,48 @@
 import Vue = require('vue')
+import 'reflect-metadata'
 import { addDecorator } from './decorators'
 
-export function prop(target: any, key: string): void {
-	addDecorator(key, options => {
-		let property: Vue.PropOptions = {}
+export type PropertyDecorator = (target: any, key: string) => void
+export function prop(type: Constructor | Constructor[]): PropertyDecorator
+export function prop(target: any, key: string): void
+export function prop(target: any, key?: string): PropertyDecorator | void {
+	function makeDecorator(type?: Constructor | Constructor[]): PropertyDecorator {
+		return (target, key) => {
+			addDecorator(key, (options, component) => {
+				let property: Vue.PropOptions = {}
 
-		if (typeof target[key] === 'object') {
-			property.default = () => target[key]
-		} else {
-			property.default = target[key]
+				if (typeof component[key] === 'object') {
+					property.default = () => component[key]
+				} else if (component[key]) {
+					property.default = component[key]
+				} else {
+					property.required = true
+				}
+
+				if (type !== undefined) {
+					property.type = type
+				} else if (component[key]) {
+					try {
+						property.type = Object.getPrototypeOf(component[key]).constructor
+					} catch (error) {
+						property.type = component[key].__proto__ ? component[key].__proto__.constructor : component[key].constructor
+					}
+				} else {
+					property.type = Reflect.getMetadata('design:type', target, key)
+				}
+
+				(options.props || (options.props = {}) as any)[key] = property
+
+				return true
+			})
 		}
+	}
 
-		if (property.type === undefined) {
-			try {
-				property.type = Object.getPrototypeOf(target[key]).constructor
-			} catch (error) {
-				// property.type = target[key].__proto__ ? target[key].__proto__.constructor : target[key].constructor
-			}
-		}
-
-		if (property.default === undefined) {
-			property.required = true
-		}
-
-		(options.props || (options.props = {}) as any)[key] = property
-	})
+	if (typeof key === 'string') {
+		return makeDecorator()(target, key)
+	} else {
+		return makeDecorator(target)
+	}
 }
 
 export const Prop = prop

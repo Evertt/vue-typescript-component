@@ -1,6 +1,6 @@
 import { ComponentOptions } from './component'
 
-export type Decorator = (options: ComponentOptions) => void | boolean
+export type Decorator = (options: ComponentOptions, obj: any) => void | boolean
 
 export let decorators: { [key: string]: Decorator[] } = {}
 
