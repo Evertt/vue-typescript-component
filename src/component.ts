@@ -1,4 +1,5 @@
 import Vue = require('vue')
+import { VueClass } from './vue-class'
 import { objAssign } from './util'
 import { decorators } from './decorators'
 
@@ -31,9 +32,16 @@ function makeComponentDecorator(options: ComponentOptions = {}): ComponentDecora
 		const component = new Component()
 		const prototype = Component.prototype
 
+		const superProto = Object.getPrototypeOf(prototype)
+		const Super = superProto instanceof Vue
+			? superProto.constructor as VueClass
+			: Vue
+
 		let andDecorate = (obj: any) => (key: string) =>
 			key == 'constructor' || ! (decorators[key] || []).reduce(
-				(result, decorator) => decorator(options, obj) || result, false,
+				(result, decorator) =>
+					decorator.target == obj || decorator.target == obj.__proto__
+						? decorator.fn(options, obj) || result : result, false,
 			)
 
 		let componentKeys = Object.getOwnPropertyNames(component).filter(andDecorate(component))
@@ -43,12 +51,17 @@ function makeComponentDecorator(options: ComponentOptions = {}): ComponentDecora
 		let allKeys = componentKeys.concat(prototypeKeys)
 		decKeys.filter(key => allKeys.indexOf(key) === -1).filter(andDecorate(component))
 
+		let staticKeys = Object.getOwnPropertyNames(Component)
+		let superStaticKeys = Object.getOwnPropertyNames(Super)
+		let componentStaticKeys = staticKeys.filter( key => superStaticKeys.indexOf(key) === -1)
+
 		componentKeys = componentKeys.filter(andDecorate(component))
 		prototypeKeys = prototypeKeys.filter(andDecorate(prototype))
 
 		getData(componentKeys, options, component)
 		getMethods(prototypeKeys, options, prototype)
 		getComputed(prototypeKeys, options, prototype)
+		getOptions(componentStaticKeys, options, Component)
 
 		const superOptions = Component.vueComponentOptions || {}
 		options.name       = options.name || (<any>Component).name
@@ -58,6 +71,8 @@ function makeComponentDecorator(options: ComponentOptions = {}): ComponentDecora
 		options.props      = objAssign( {}, superOptions.props,    options.props    )
 
 		Component.vueComponentOptions = options
+
+		if (process.env.NODE_ENV !== 'test') return Super.extend(options)
 	}
 }
 
@@ -84,6 +99,10 @@ function getComputed(keys: string[], options: ComponentOptions, prototype: any) 
 		let pd = Object.getOwnPropertyDescriptor(prototype, key)
 		return { [key]: { get: pd.get, set: pd.set } }
 	})
+}
+
+function getOptions(keys: string[], options: ComponentOptions, Component: any) {
+	objAssign(options, keys.mapToObject(makeObject(Component)))
 }
 
 /** Create property constructor.vueComponentOptions based on method/field annotations

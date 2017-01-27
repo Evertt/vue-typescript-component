@@ -1,11 +1,17 @@
 import { ComponentOptions } from './component'
 
-export type Decorator = (options: ComponentOptions, obj: any) => void | boolean
+export type Decorator = {
+    target: any,
+    fn: (options: ComponentOptions, obj: any) => void | boolean
+}
 
 export let decorators: { [key: string]: Decorator[] } = {}
 
-export function addDecorator(key: string, decorator: Decorator) {
+export function addDecorator(target: any, key: string, fn: (options: ComponentOptions, obj: any) => void | boolean) {
 	let list = decorators[key] || []
-	list.push(decorator)
+	list.push({
+        target: target,
+        fn: fn
+    })
 	decorators[key] = list
 }

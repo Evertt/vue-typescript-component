@@ -1,7 +1,7 @@
 import { addDecorator } from './decorators'
 
 export function injected(target: any, key: string): void {
-    addDecorator(key, () => true)
+    addDecorator(target, key, () => true)
 }
 
 export const Injected = injected

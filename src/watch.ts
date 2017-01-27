@@ -4,7 +4,7 @@ import { addDecorator } from './decorators'
 
 export function watch(property: string, watchOptions: Vue.WatchOptions = {}) {
 	return (target: any, key: string) => {
-		addDecorator(key, options => {
+		addDecorator(target, key, options => {
 			let watch: any = (options.watch || (options.watch = {}))
 
 			if (watch[property] && watch[property].handler !== key) {

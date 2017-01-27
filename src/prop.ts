@@ -8,7 +8,7 @@ export function prop(target: any, key: string): void
 export function prop(target: any, key?: string): PropertyDecorator | void {
 	function makeDecorator(type?: Constructor | Constructor[]): PropertyDecorator {
 		return (target, key) => {
-			addDecorator(key, (options, component) => {
+			addDecorator(target, key, (options, component) => {
 				let property: Vue.PropOptions = {}
 
 				if (typeof component[key] === 'object') {

@@ -5,6 +5,8 @@ import { Component, prop, watch, lifecycle } from '../src/index'
 
 @Component
 class AllInOne extends Vue {
+	static components = { Vue }
+
 	aString = 'abc'
 	aNumber = 123
 	// tslint:disable-next-line:variable-name

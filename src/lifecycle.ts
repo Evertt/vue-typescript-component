@@ -19,7 +19,7 @@ export function lifecycle(target: any, key: string): void {
 		)
 	}
 
-	addDecorator(key, options => {
+	addDecorator(target, key, options => {
 		(options as any)[key] = Object.getOwnPropertyDescriptor(target, key).value
 
 		return true
